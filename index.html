@@ -1,183 +1,162 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>下班倒计时</title>
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts - Inter -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-    <style>
-        /* 自定义 CSS 来创建梦幻的渐变背景 */
-        body {
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #fce4ec, #e8f5e9, #e1f5fe, #fff9c4);
-            background-size: 400% 400%;
-            animation: gradientAnimation 15s ease infinite;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>下班倒计时</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts - Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #fce4ec, #e8f5e9, #e1f5fe, #fff9c4);
+      background-size: 400% 400%;
+      animation: gradientAnimation 15s ease infinite;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    @keyframes gradientAnimation {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
 
-        @keyframes gradientAnimation {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-
-        /* 烟花容器 */
-        .firework-container {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            /* 提升 z-index，确保它在其他内容之上 */
-            z-index: 20;
-            pointer-events: none;
-            overflow: hidden;
-        }
-
-        /* 烟花表情符号的样式 */
-        .firework-emoji {
-            position: absolute;
-            font-size: 3rem; /* 表情符号的大小，让它更明显 */
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            animation: single-firework 2.5s ease-out forwards;
-        }
-
-        @keyframes single-firework {
-            0% {
-                transform: translate(-50%, -50%) scale(0) rotate(0deg);
-                opacity: 1;
-            }
-            25% {
-                transform: translate(-50%, -50%) scale(1.5) rotate(30deg);
-                opacity: 1;
-            }
-            75% {
-                transform: translate(-50%, -50%) scale(1.5) rotate(-60deg);
-                opacity: 1;
-            }
-            100% {
-                transform: translate(-50%, -50%) scale(1.5) rotate(30deg);
-                opacity: 0;
-            }
-        }
-    </style>
+    /* 烟花容器 */
+    .firework-container {
+      position: absolute;
+      inset: 0;
+      z-index: 20;
+      pointer-events: none;
+      overflow: hidden;
+    }
+    .firework-emoji {
+      position: absolute;
+      font-size: 3rem;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      animation: single-firework 2.5s ease-out forwards;
+    }
+    @keyframes single-firework {
+      0% { transform: translate(-50%, -50%) scale(0) rotate(0deg); opacity: 1; }
+      25% { transform: translate(-50%, -50%) scale(1.5) rotate(30deg); opacity: 1; }
+      75% { transform: translate(-50%, -50%) scale(1.5) rotate(-60deg); opacity: 1; }
+      100% { transform: translate(-50%, -50%) scale(1.5) rotate(30deg); opacity: 0; }
+    }
+  </style>
 </head>
 <body class="bg-gray-100 flex items-center justify-center min-h-screen">
-    <div id="component-container" class="relative w-11/12 max-w-sm p-8 bg-white/60 backdrop-blur-md rounded-[32px] shadow-2xl text-center transition-all duration-500 transform hover:scale-105">
-        <!-- 倒计时/问候语显示区域 -->
-        <div id="content-display" class="relative z-10">
-            <p id="countdown-message" class="text-lg sm:text-xl font-medium text-gray-600">距离下班还有</p>
-            <h1 class="text-4xl sm:text-5xl md:text-6xl font-extrabold text-gray-800 tracking-tight leading-tight mb-2">
-                <span id="countdown-hours">--</span>:<span id="countdown-minutes">--</span>:<span id="countdown-seconds">--</span>
-            </h1>
-        </div>
-        <!-- 烟花容器 -->
-        <div id="firework-container" class="firework-container hidden"></div>
-        
-        <!-- 手动触发烟花的按钮，默认隐藏 -->
-        <button id="firework-button" class="mt-4 px-6 py-2 bg-gradient-to-r from-pink-300 to-purple-400 text-white font-semibold rounded-full shadow-lg hover:from-pink-400 hover:to-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-300 focus:ring-opacity-50 transition-transform transform hover:scale-105 hidden">
-            立即放烟花
-        </button>
+  <div id="component-container" class="relative w-11/12 max-w-sm p-8 bg-white/60 backdrop-blur-md rounded-[32px] shadow-2xl text-center transition-all duration-500 transform hover:scale-105">
+    <!-- 文案区域 -->
+    <div id="content-display" class="relative z-10">
+      <p id="countdown-message" class="text-lg sm:text-xl font-medium text-gray-600">距离下班还有</p>
+      <!-- 倒计时行：整行可隐藏，避免冒号残留 -->
+      <h1 id="countdown-row" class="text-4xl sm:text-5xl md:text-6xl font-extrabold text-gray-800 tracking-tight leading-tight mb-2">
+        <span id="countdown-hours">--</span>
+        <span class="mx-1">:</span>
+        <span id="countdown-minutes">--</span>
+        <span class="mx-1">:</span>
+        <span id="countdown-seconds">--</span>
+      </h1>
     </div>
 
-    <script>
-        // 定义全局变量以供访问
-        const countdownHours = document.getElementById('countdown-hours');
-        const countdownMinutes = document.getElementById('countdown-minutes');
-        const countdownSeconds = document.getElementById('countdown-seconds');
-        const countdownMessage = document.getElementById('countdown-message');
-        const fireworkContainer = document.getElementById('firework-container');
-        const componentContainer = document.getElementById('component-container');
-        const fireworkButton = document.getElementById('firework-button');
+    <!-- 烟花容器 -->
+    <div id="firework-container" class="firework-container hidden"></div>
 
-        let animationTriggered = false;
+    <!-- 手动触发烟花按钮（默认隐藏） -->
+    <button id="firework-button" class="mt-4 px-6 py-2 bg-gradient-to-r from-pink-300 to-purple-400 text-white font-semibold rounded-full shadow-lg hover:from-pink-400 hover:to-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-300 focus:ring-opacity-50 transition-transform transform hover:scale-105 hidden">
+      立即放烟花
+    </button>
+  </div>
 
-        // 生成随机数
-        function getRandom(min, max) {
-            return Math.random() * (max - min) + min;
+  <script>
+    // ===== 可配置项 =====
+    const WORK_END_HOUR = 17; // 24小时制，默认 17:00 下班
+    const WORKDAYS = [1, 2, 3, 4, 5]; // 周一~周五
+
+    // ===== DOM =====
+    const elH = document.getElementById('countdown-hours');
+    const elM = document.getElementById('countdown-minutes');
+    const elS = document.getElementById('countdown-seconds');
+    const elMsg = document.getElementById('countdown-message');
+    const elRow = document.getElementById('countdown-row');
+    const fireworkContainer = document.getElementById('firework-container');
+    const container = document.getElementById('component-container');
+    const fireworkButton = document.getElementById('firework-button');
+
+    let animationTriggered = false;
+
+    function inWorkCountdownWindow(now = new Date()) {
+      const dayOK = WORKDAYS.includes(now.getDay());
+      const beforeEnd = now.getHours() < WORK_END_HOUR || (now.getHours() === WORK_END_HOUR && now.getMinutes() === 0 && now.getSeconds() === 0);
+      return dayOK && beforeEnd;
+    }
+
+    // 烟花
+    function launchFireworks() {
+      if (animationTriggered) return;
+      animationTriggered = true;
+      fireworkContainer.classList.remove('hidden');
+      const particle = document.createElement('span');
+      particle.className = 'firework-emoji';
+      particle.textContent = '🎉';
+      fireworkContainer.appendChild(particle);
+      setTimeout(() => {
+        fireworkContainer.removeChild(particle);
+        fireworkContainer.classList.add('hidden');
+        animationTriggered = false;
+      }, 2500);
+    }
+
+    function pad2(n) { return String(n).padStart(2, '0'); }
+
+    function updateCountdown() {
+      const now = new Date();
+
+      if (inWorkCountdownWindow(now)) {
+        // 显示倒计时行，避免冒号/点残留
+        elRow.classList.remove('hidden');
+
+        const target = new Date(now.getFullYear(), now.getMonth(), now.getDate(), WORK_END_HOUR, 0, 0);
+        const diffMs = Math.max(0, target - now);
+
+        if (diffMs === 0) {
+          elMsg.textContent = '祝你下班快乐!';
+          elH.textContent = '00';
+          elM.textContent = '00';
+          elS.textContent = '00';
+          container.classList.add('bg-pink-100');
+          launchFireworks();
+        } else {
+          const totalSec = Math.floor(diffMs / 1000);
+          const h = Math.floor(totalSec / 3600);
+          const m = Math.floor((totalSec % 3600) / 60);
+          const s = totalSec % 60;
+          elH.textContent = pad2(h);
+          elM.textContent = pad2(m);
+          elS.textContent = pad2(s);
+          elMsg.textContent = '距离下班还有';
+          container.classList.remove('bg-pink-100');
         }
+      } else {
+        // 非工作时间：隐藏整行倒计时，彻底消除冒号残影
+        elRow.classList.add('hidden');
+        elMsg.textContent = '要好好生活🥰';
+        container.classList.remove('bg-pink-100');
+      }
+    }
 
-        // 启动烟花动画
-        function launchFireworks() {
-            if (animationTriggered) return;
-            animationTriggered = true;
-
-            fireworkContainer.classList.remove('hidden');
-
-            const particle = document.createElement('span');
-            particle.classList.add('firework-emoji');
-            particle.textContent = '🎉';
-            fireworkContainer.appendChild(particle);
-
-            // 移除粒子
-            setTimeout(() => {
-                fireworkContainer.removeChild(particle);
-                fireworkContainer.classList.add('hidden');
-                animationTriggered = false; // 重置，允许下次触发
-            }, 2500); // 动画持续时间
-        }
-
-        // 更新倒计时
-        function updateCountdown() {
-            const now = new Date();
-            const dayOfWeek = now.getDay();
-            const hours = now.getHours();
-
-            // 检查是否是工作日 (周一到周五) 且在17点之前
-            if (dayOfWeek >= 1 && dayOfWeek <= 5 && hours < 17) {
-                const targetTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 17, 0, 0);
-                const timeLeft = targetTime.getTime() - now.getTime();
-
-                if (timeLeft <= 0) {
-                    // 到达下班时间
-                    countdownMessage.textContent = '祝你下班快乐!';
-                    countdownHours.textContent = '00';
-                    countdownMinutes.textContent = '00';
-                    countdownSeconds.textContent = '00';
-                    componentContainer.classList.add('bg-pink-100'); // 改变背景色以示庆祝
-                    launchFireworks();
-                } else {
-                    // 还在工作时间，正常倒计时
-                    const totalSeconds = Math.floor(timeLeft / 1000);
-                    const h = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
-                    const m = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0');
-                    const s = String(totalSeconds % 60).padStart(2, '0');
-
-                    countdownHours.textContent = h;
-                    countdownMinutes.textContent = m;
-                    countdownSeconds.textContent = s;
-                    countdownMessage.textContent = '距离下班还有';
-                }
-            } else {
-                // 非工作时间，显示问候语
-                countdownMessage.textContent = '要好好生活🥰';
-                countdownHours.textContent = '';
-                countdownMinutes.textContent = '';
-                countdownSeconds.textContent = '';
-                componentContainer.classList.remove('bg-pink-100');
-            }
-        }
-
-        // 每秒更新一次倒计时
-        document.addEventListener('DOMContentLoaded', () => {
-            updateCountdown();
-            setInterval(updateCountdown, 1000);
-            
-            // 为新增的按钮添加点击事件监听器
-            fireworkButton.addEventListener('click', () => {
-                launchFireworks();
-            });
-        });
-    </script>
+    document.addEventListener('DOMContentLoaded', () => {
+      updateCountdown();
+      setInterval(updateCountdown, 1000);
+      fireworkButton.addEventListener('click', launchFireworks);
+    });
+  </script>
 </body>
 </html>
