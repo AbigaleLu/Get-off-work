@@ -1,162 +1,715 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>下班倒计时</title>
-  <!-- Tailwind CSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Google Fonts - Inter -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
-  <style>
-    body {
-      font-family: 'Inter', sans-serif;
-      background: linear-gradient(135deg, #fce4ec, #e8f5e9, #e1f5fe, #fff9c4);
-      background-size: 400% 400%;
-      animation: gradientAnimation 15s ease infinite;
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-    @keyframes gradientAnimation {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>倒计时合集 · 放假 & 下班</title>
+    <meta name="color-scheme" content="light dark">
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --ring: rgba(0, 0, 0, 0.06);
+            --text-1: #222;
+            --text-2: #555;
+            --brand: #007aff;
+            --card-bg: rgba(255, 255, 255, 0.9);
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --ring: rgba(255, 255, 255, 0.12);
+                --text-1: #f5f5f7;
+                --text-2: #d0d3d7;
+                --card-bg: rgba(20, 20, 20, 0.7);
+            }
+            body {
+                background: radial-gradient(1200px 600px at 10% 0%, rgba(20, 30, 60, 0.8) 0, transparent 60%),
+                            radial-gradient(1200px 600px at 90% 100%, rgba(30, 20, 10, 0.8) 0, transparent 60%),
+                            linear-gradient(180deg, #1c1c1e, #18191d);
+            }
+            .offwork-bg {
+                filter: brightness(0.8) saturate(1.2);
+            }
+        }
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            min-height: 100vh;
+            margin: 0;
+            padding: 24px;
+            background: radial-gradient(1200px 600px at 10% 0%, #f1f5ff 0, transparent 60%),
+                        radial-gradient(1200px 600px at 90% 100%, #fff7ed 0, transparent 60%),
+                        linear-gradient(180deg, #fafafa, #f6f7fb);
+            transition: background-color 0.5s;
+        }
+        .page-wrap {
+            max-width: 1100px;
+            margin: 0 auto;
+            display: grid;
+            gap: 24px;
+            grid-template-columns: 1fr;
+        }
+        @media (min-width: 980px) {
+            .page-wrap {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
 
-    /* 烟花容器 */
-    .firework-container {
-      position: absolute;
-      inset: 0;
-      z-index: 20;
-      pointer-events: none;
-      overflow: hidden;
-    }
-    .firework-emoji {
-      position: absolute;
-      font-size: 3rem;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      animation: single-firework 2.5s ease-out forwards;
-    }
-    @keyframes single-firework {
-      0% { transform: translate(-50%, -50%) scale(0) rotate(0deg); opacity: 1; }
-      25% { transform: translate(-50%, -50%) scale(1.5) rotate(30deg); opacity: 1; }
-      75% { transform: translate(-50%, -50%) scale(1.5) rotate(-60deg); opacity: 1; }
-      100% { transform: translate(-50%, -50%) scale(1.5) rotate(30deg); opacity: 0; }
-    }
-  </style>
+        /* ======= 通用卡片骨架（外层） ======= */
+        .card-shell {
+            position: relative;
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 14px 40px rgba(0, 0, 0, .10);
+            border: 1px solid var(--ring);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            background: var(--card-bg);
+        }
+        .card-inner {
+            position: relative;
+            padding: 26px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            min-height: 320px;
+            z-index: 1;
+        }
+        .card-title {
+            margin: 0;
+            font-weight: 700;
+            letter-spacing: .02em;
+            color: var(--text-1);
+            text-shadow: 0 1px 0 rgba(255, 255, 255, .15);
+        }
+        .subtle {
+            color: var(--text-2);
+            font-size: .95rem;
+            min-height: 1.25em;
+            text-align: center;
+        }
+
+        /* ======= 放假卡：保留原生渐变动画（迁移到卡背景） ======= */
+        .holiday-bg {
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+            opacity: 1;
+            background: linear-gradient(135deg, #d3c4d7, #c6b2c2, #e5d1a8, #f4c284);
+            background-size: 400% 400%;
+            animation: holidayGradient 15s ease infinite;
+        }
+        @keyframes holidayGradient {
+            0% {
+                background-position: 0% 50%
+            }
+            50% {
+                background-position: 100% 50%
+            }
+            100% {
+                background-position: 0% 50%
+            }
+        }
+
+        /* ======= 下班卡：保留原生渐变动画（迁移到卡背景） ======= */
+        .offwork-bg {
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+            opacity: 1;
+            background: linear-gradient(135deg, #fce4ec, #e8f5e9, #e1f5fe, #fff9c4);
+            background-size: 400% 400%;
+            animation: offworkGradient 15s ease infinite;
+        }
+        @keyframes offworkGradient {
+            0% {
+                background-position: 0% 50%
+            }
+            50% {
+                background-position: 100% 50%
+            }
+            100% {
+                background-position: 0% 50%
+            }
+        }
+
+        /* ======= 放假卡内部控件（延续你原来的细节） ======= */
+        .field {
+            width: 100%;
+            display: grid;
+            gap: 10px;
+        }
+        .holiday-input {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid #cfcfd3;
+            border-radius: 12px;
+            font-size: 1rem;
+            color: var(--text-2);
+            background: rgba(255, 255, 255, 0.9);
+            appearance: none;
+            outline: none;
+            transition: border-color .2s ease, box-shadow .2s ease;
+        }
+        .holiday-input:focus {
+            border-color: var(--brand);
+            box-shadow: 0 0 0 4px rgba(0, 122, 255, .12);
+            color: var(--text-1);
+        }
+        .primary-btn {
+            width: 100%;
+            padding: 14px 16px;
+            border: none;
+            border-radius: 12px;
+            background: var(--brand);
+            color: #fff;
+            font-weight: 650;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: transform .06s ease, background-color .2s ease;
+        }
+        .primary-btn:hover {
+            background: #005ecb;
+        }
+        .primary-btn:active {
+            transform: translateY(1px);
+        }
+
+        .bigline {
+            font-size: 1.15rem;
+            color: var(--text-1);
+            font-weight: 600;
+        }
+        .days-large {
+            font-size: 3rem;
+            font-weight: 800;
+            color: var(--text-1);
+            margin: 4px 0;
+        }
+
+        .progress-wrap {
+            width: 100%;
+            display: grid;
+            gap: 8px;
+        }
+        .progress-bar {
+            height: 10px;
+            width: 100%;
+            background: rgba(0, 0, 0, 0.08);
+            border-radius: 999px;
+            overflow: hidden;
+        }
+        .progress-bar>div {
+            height: 100%;
+            width: 0%;
+            background: var(--brand);
+            transition: width .6s ease;
+        }
+        .progress-labels {
+            display: flex;
+            justify-content: space-between;
+            color: var(--text-2);
+            font-size: .85rem;
+        }
+
+        .hidden-el {
+            opacity: 0;
+            position: absolute;
+            pointer-events: none;
+        }
+        .visible-el {
+            opacity: 1;
+            position: relative;
+            pointer-events: auto;
+        }
+
+        /* ======= 下班卡内部（沿用 Tailwind + 轻微补充） ======= */
+        .firework-container {
+            position: absolute;
+            inset: 0;
+            z-index: 20;
+            pointer-events: none;
+            overflow: hidden;
+        }
+        .firework-emoji {
+            position: absolute;
+            font-size: 3rem;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            animation: single-firework 2.5s ease-out forwards;
+        }
+        @keyframes single-firework {
+            0% {
+                transform: translate(-50%, -50%) scale(0) rotate(0deg);
+                opacity: 1;
+            }
+            25% {
+                transform: translate(-50%, -50%) scale(1.5) rotate(30deg);
+                opacity: 1;
+            }
+            75% {
+                transform: translate(-50%, -50%) scale(1.5) rotate(-60deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(-50%, -50%) scale(1.5) rotate(30deg);
+                opacity: 0;
+            }
+        }
+
+        /* 小标题条，增强视觉区分 */
+        .section-tag {
+            position: absolute;
+            top: 10px;
+            left: 14px;
+            z-index: 2;
+            font-size: .75rem;
+            font-weight: 700;
+            letter-spacing: .08em;
+            color: rgba(0, 0, 0, .65);
+            background: rgba(255, 255, 255, .75);
+            padding: 6px 10px;
+            border-radius: 999px;
+            border: 1px solid var(--ring);
+            backdrop-filter: blur(8px);
+        }
+        @media (prefers-color-scheme: dark) {
+            .section-tag {
+                color: #e5e7eb;
+                background: rgba(20, 20, 20, .55);
+            }
+        }
+
+        /* Message box styling */
+        .message-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            transition: opacity 0.3s ease;
+        }
+
+        .message-modal-content {
+            background: var(--card-bg);
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--ring);
+            max-width: 320px;
+            width: 90%;
+            text-align: center;
+        }
+
+        .message-modal-content h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-1);
+            margin-bottom: 12px;
+        }
+
+        .message-modal-content p {
+            color: var(--text-2);
+            margin-bottom: 20px;
+        }
+
+        .message-modal-content button {
+            background: var(--brand);
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: background-color 0.2s;
+        }
+
+        .message-modal-content button:hover {
+            background: #005ecb;
+        }
+    </style>
 </head>
-<body class="bg-gray-100 flex items-center justify-center min-h-screen">
-  <div id="component-container" class="relative w-11/12 max-w-sm p-8 bg-white/60 backdrop-blur-md rounded-[32px] shadow-2xl text-center transition-all duration-500 transform hover:scale-105">
-    <!-- 文案区域 -->
-    <div id="content-display" class="relative z-10">
-      <p id="countdown-message" class="text-lg sm:text-xl font-medium text-gray-600">距离下班还有</p>
-      <!-- 倒计时行：整行可隐藏，避免冒号残留 -->
-      <h1 id="countdown-row" class="text-4xl sm:text-5xl md:text-6xl font-extrabold text-gray-800 tracking-tight leading-tight mb-2">
-        <span id="countdown-hours">--</span>
-        <span class="mx-1">:</span>
-        <span id="countdown-minutes">--</span>
-        <span class="mx-1">:</span>
-        <span id="countdown-seconds">--</span>
-      </h1>
+<body>
+    <main class="page-wrap">
+        <!-- User ID Display -->
+        <div class="fixed top-4 right-4 text-xs text-gray-400 dark:text-gray-500 z-50">
+            <span class="font-semibold">User ID:</span>
+            <span id="user-id" class="ml-1 text-gray-600 dark:text-gray-300">Loading...</span>
+        </div>
+
+        <!-- ===================== 放假倒计时卡 ===================== -->
+        <section class="card-shell" aria-labelledby="holiday-title">
+            <div class="holiday-bg" aria-hidden="true"></div>
+            <span class="section-tag">HOLIDAY</span>
+            <div class="card-inner" id="holiday-card">
+                <h1 id="holiday-title" class="card-title text-[1.9rem]">放假倒计时</h1>
+                <div id="holiday-selected-date-label" class="subtle"></div>
+
+                <!-- 输入界面 -->
+                <div id="holiday-input-container" class="visible-el" aria-hidden="false" style="width:100%;display:flex;flex-direction:column;align-items:center;gap:14px;">
+                    <div class="field">
+                        <input type="date" id="holiday-date-picker" class="holiday-input" aria-label="选择放假日期">
+                    </div>
+                    <button id="holiday-calc-btn" class="primary-btn" aria-describedby="holiday-selected-date-label">确认</button>
+                </div>
+
+                <!-- 结果界面 -->
+                <div id="holiday-result-container" class="hidden-el" aria-hidden="true" style="width:100%;display:flex;flex-direction:column;align-items:center;gap:14px;">
+                    <div id="holiday-countdown-text" class="bigline" aria-live="polite"></div>
+                    <div id="holiday-countdown-days" class="days-large" aria-live="polite"></div>
+
+                    <div class="progress-wrap" id="holiday-progress-wrap" hidden>
+                        <div class="progress-bar">
+                            <div id="holiday-progress-inner"></div>
+                        </div>
+                        <div class="progress-labels">
+                            <span>今天</span>
+                            <span id="holiday-progress-end">目标日</span>
+                        </div>
+                    </div>
+
+                    <!-- 已隐藏的操作按钮保留在 DOM 中（可随时启用） -->
+                    <div class="hidden">
+                        <button id="holiday-reset-btn" class="primary-btn" style="background:transparent;color:var(--brand);border:1px solid rgba(0,122,255,0.3)">重新选择</button>
+                        <button id="holiday-share-btn" class="primary-btn" style="background:transparent;color:var(--brand);border:1px solid rgba(0,122,255,0.3)">分享</button>
+                    </div>
+                </div>
+            </div>
+            <div id="holiday-live-region" aria-live="polite" aria-atomic="true" style="position:absolute;width:1px;height:1px;margin:-1px;border:0;padding:0;clip:rect(0 0 0 0);overflow:hidden;white-space:nowrap;"></div>
+        </section>
+
+        <!-- ===================== 下班倒计时卡 ===================== -->
+        <section class="card-shell" aria-labelledby="offwork-title">
+            <div class="offwork-bg" aria-hidden="true"></div>
+            <span class="section-tag">OFF-WORK</span>
+            <div class="card-inner relative" id="offwork-card">
+                <h1 id="offwork-title" class="card-title text-[1.9rem]">下班倒计时</h1>
+                <div id="offwork-content-display" class="relative z-10 text-center">
+                    <p id="offwork-msg" class="text-lg font-medium text-gray-700/90 dark:text-gray-200/90">距离下班还有</p>
+                    <h2 id="offwork-row" class="text-5xl md:text-6xl font-extrabold tracking-tight leading-tight mt-1 text-gray-800 dark:text-gray-100">
+                        <span id="offwork-hh">--</span><span class="mx-1">:</span>
+                        <span id="offwork-mm">--</span><span class="mx-1">:</span>
+                        <span id="offwork-ss">--</span>
+                    </h2>
+                </div>
+                <div id="offwork-fireworks" class="firework-container hidden"></div>
+                <button id="offwork-fire-btn" class="hidden mt-3 px-5 py-2 bg-gradient-to-r from-pink-300 to-purple-400 text-white font-semibold rounded-full shadow-lg hover:from-pink-400 hover:to-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-300 focus:ring-opacity-50 transition-transform transform hover:scale-105">
+                    立即放烟花
+                </button>
+            </div>
+        </section>
+    </main>
+
+    <!-- Custom message box modal -->
+    <div id="message-modal" class="message-modal hidden">
+        <div class="message-modal-content">
+            <h3 id="message-modal-title">提示</h3>
+            <p id="message-modal-text">这是一个消息</p>
+            <button id="message-modal-ok">确定</button>
+        </div>
     </div>
 
-    <!-- 烟花容器 -->
-    <div id="firework-container" class="firework-container hidden"></div>
+    <!-- Firebase SDK Imports -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-    <!-- 手动触发烟花按钮（默认隐藏） -->
-    <button id="firework-button" class="mt-4 px-6 py-2 bg-gradient-to-r from-pink-300 to-purple-400 text-white font-semibold rounded-full shadow-lg hover:from-pink-400 hover:to-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-300 focus:ring-opacity-50 transition-transform transform hover:scale-105 hidden">
-      立即放烟花
-    </button>
-  </div>
+        // Enable debug logging for Firestore
+        setLogLevel('debug');
 
-  <script>
-    // ===== 可配置项 =====
-    const WORK_END_HOUR = 17; // 24小时制，默认 17:00 下班
-    const WORKDAYS = [1, 2, 3, 4, 5]; // 周一~周五
+        // Global variables for Firebase configuration and authentication token
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
-    // ===== DOM =====
-    const elH = document.getElementById('countdown-hours');
-    const elM = document.getElementById('countdown-minutes');
-    const elS = document.getElementById('countdown-seconds');
-    const elMsg = document.getElementById('countdown-message');
-    const elRow = document.getElementById('countdown-row');
-    const fireworkContainer = document.getElementById('firework-container');
-    const container = document.getElementById('component-container');
-    const fireworkButton = document.getElementById('firework-button');
+        let db = null;
+        let auth = null;
+        let userId = null;
 
-    let animationTriggered = false;
-
-    function inWorkCountdownWindow(now = new Date()) {
-      const dayOK = WORKDAYS.includes(now.getDay());
-      const beforeEnd = now.getHours() < WORK_END_HOUR || (now.getHours() === WORK_END_HOUR && now.getMinutes() === 0 && now.getSeconds() === 0);
-      return dayOK && beforeEnd;
-    }
-
-    // 烟花
-    function launchFireworks() {
-      if (animationTriggered) return;
-      animationTriggered = true;
-      fireworkContainer.classList.remove('hidden');
-      const particle = document.createElement('span');
-      particle.className = 'firework-emoji';
-      particle.textContent = '🎉';
-      fireworkContainer.appendChild(particle);
-      setTimeout(() => {
-        fireworkContainer.removeChild(particle);
-        fireworkContainer.classList.add('hidden');
-        animationTriggered = false;
-      }, 2500);
-    }
-
-    function pad2(n) { return String(n).padStart(2, '0'); }
-
-    function updateCountdown() {
-      const now = new Date();
-
-      if (inWorkCountdownWindow(now)) {
-        // 显示倒计时行，避免冒号/点残留
-        elRow.classList.remove('hidden');
-
-        const target = new Date(now.getFullYear(), now.getMonth(), now.getDate(), WORK_END_HOUR, 0, 0);
-        const diffMs = Math.max(0, target - now);
-
-        if (diffMs === 0) {
-          elMsg.textContent = '祝你下班快乐!';
-          elH.textContent = '00';
-          elM.textContent = '00';
-          elS.textContent = '00';
-          container.classList.add('bg-pink-100');
-          launchFireworks();
-        } else {
-          const totalSec = Math.floor(diffMs / 1000);
-          const h = Math.floor(totalSec / 3600);
-          const m = Math.floor((totalSec % 3600) / 60);
-          const s = totalSec % 60;
-          elH.textContent = pad2(h);
-          elM.textContent = pad2(m);
-          elS.textContent = pad2(s);
-          elMsg.textContent = '距离下班还有';
-          container.classList.remove('bg-pink-100');
+        // Custom function to show a message box instead of alert()
+        function showMessage(text, title = '提示') {
+            const modal = document.getElementById('message-modal');
+            document.getElementById('message-modal-title').textContent = title;
+            document.getElementById('message-modal-text').textContent = text;
+            modal.classList.remove('hidden');
+            document.getElementById('message-modal-ok').onclick = () => {
+                modal.classList.add('hidden');
+            };
         }
-      } else {
-        // 非工作时间：隐藏整行倒计时，彻底消除冒号残影
-        elRow.classList.add('hidden');
-        elMsg.textContent = '要好好生活🥰';
-        container.classList.remove('bg-pink-100');
-      }
-    }
 
-    document.addEventListener('DOMContentLoaded', () => {
-      updateCountdown();
-      setInterval(updateCountdown, 1000);
-      fireworkButton.addEventListener('click', launchFireworks);
-    });
-  </script>
+        // =============== 工具函数（共享） ===============
+        const pad2 = n => String(n).padStart(2, '0');
+        const toLocalMidnight = d => {
+            const x = new Date(d);
+            x.setHours(0, 0, 0, 0);
+            return x;
+        };
+        const fmtDateFull = d => new Intl.DateTimeFormat('zh-CN', {
+            dateStyle: 'full'
+        }).format(d);
+        const fromYMD = s => {
+            const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s);
+            if (!m) return null;
+            const yy = parseInt(m[1], 10),
+                mm = parseInt(m[2], 10) - 1,
+                dd = parseInt(m[3], 10);
+            return new Date(yy, mm, dd, 0, 0, 0, 0);
+        };
+        const ymd = d => `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`;
+
+        // =============== 放假倒计时（命名空间：holiday-） ===============
+        (function() {
+            const root = document.getElementById('holiday-card');
+            const datePicker = document.getElementById('holiday-date-picker');
+            const calcBtn = document.getElementById('holiday-calc-btn');
+            const inputContainer = document.getElementById('holiday-input-container');
+            const resultContainer = document.getElementById('holiday-result-container');
+            const label = document.getElementById('holiday-selected-date-label');
+            const text = document.getElementById('holiday-countdown-text');
+            const days = document.getElementById('holiday-countdown-days');
+            const progressWrap = document.getElementById('holiday-progress-wrap');
+            const progressInner = document.getElementById('holiday-progress-inner');
+            const progressEnd = document.getElementById('holiday-progress-end');
+            const live = document.getElementById('holiday-live-region');
+
+            const today = toLocalMidnight(new Date());
+            datePicker.min = ymd(today);
+            datePicker.value = ymd(today); // Default to today's date
+            let tickTimer = null;
+
+            function showResult(targetMidnight) {
+                inputContainer.classList.replace('visible-el', 'hidden-el');
+                inputContainer.setAttribute('aria-hidden', 'true');
+                resultContainer.classList.replace('hidden-el', 'visible-el');
+                resultContainer.setAttribute('aria-hidden', 'false');
+
+                label.textContent = `目标日：${fmtDateFull(targetMidnight)}`;
+                progressEnd.textContent = new Intl.DateTimeFormat('zh-CN', {
+                    month: 'long',
+                    day: 'numeric'
+                }).format(targetMidnight);
+
+                if (tickTimer) clearInterval(tickTimer);
+                const start = toLocalMidnight(new Date());
+                const totalMs = targetMidnight - start;
+
+                const tick = () => {
+                    const now = new Date();
+                    const msLeft = targetMidnight - now;
+                    const daysLeft = Math.ceil((toLocalMidnight(targetMidnight) - toLocalMidnight(now)) / 86400000);
+
+                    if (daysLeft <= 0) {
+                        text.textContent = '今天就是放假啦！🎉';
+                        days.textContent = '0';
+                        progressWrap.hidden = true;
+                        live.textContent = '今天放假';
+                        clearInterval(tickTimer);
+                        return;
+                    }
+                    text.textContent = '距离放假还有';
+                    days.textContent = String(daysLeft);
+
+                    if (totalMs > 0) {
+                        const done = Math.min(1, Math.max(0, 1 - (msLeft / totalMs)));
+                        progressWrap.hidden = false;
+                        progressInner.style.width = (done * 100).toFixed(2) + '%';
+                    } else {
+                        progressWrap.hidden = true;
+                    }
+                    live.textContent = `还有 ${daysLeft} 天`;
+                };
+                tick();
+                tickTimer = setInterval(tick, 1000);
+            }
+
+            // Click to save the selected date to Firestore
+            calcBtn.addEventListener('click', async (e) => {
+                e.stopPropagation();
+                if (!datePicker.value) {
+                    showMessage('请先选择一个日期哦！');
+                    return;
+                }
+                const sel = fromYMD(datePicker.value);
+                if (!sel) {
+                    showMessage('日期格式无效');
+                    return;
+                }
+                const selMid = toLocalMidnight(sel);
+                if (selMid < today) {
+                    showMessage('这个日期已经过去了，请选择一个未来的日期。');
+                    return;
+                }
+                
+                // Save date to Firestore
+                if (db && userId) {
+                    const docPath = `/artifacts/${appId}/users/${userId}/holiday_countdown/target_date`;
+                    try {
+                        await setDoc(doc(db, docPath), {
+                            date: selMid.toISOString()
+                        });
+                    } catch (error) {
+                        console.error("Error saving date to Firestore:", error);
+                        showMessage("保存日期失败，请重试。");
+                    }
+                }
+            });
+
+            // Listen for changes from Firestore
+            function listenForDateChanges() {
+                if (db && userId) {
+                    const docPath = `/artifacts/${appId}/users/${userId}/holiday_countdown/target_date`;
+                    onSnapshot(doc(db, docPath), (docSnapshot) => {
+                        if (docSnapshot.exists()) {
+                            const data = docSnapshot.data();
+                            const targetDateString = data.date;
+                            if (targetDateString) {
+                                const d = new Date(targetDateString);
+                                if (d && d >= today) {
+                                    datePicker.value = ymd(d);
+                                    showResult(toLocalMidnight(d));
+                                }
+                            }
+                        } else {
+                            console.log("No saved date found, showing input.");
+                            if (tickTimer) clearInterval(tickTimer);
+                            resultContainer.classList.replace('visible-el', 'hidden-el');
+                            resultContainer.setAttribute('aria-hidden', 'true');
+                            inputContainer.classList.replace('hidden-el', 'visible-el');
+                            inputContainer.setAttribute('aria-hidden', 'false');
+                        }
+                    });
+                }
+            }
+
+            // Click card to switch back to input
+            root.addEventListener('click', () => {
+                if (resultContainer.classList.contains('visible-el')) {
+                    if (tickTimer) clearInterval(tickTimer);
+                    resultContainer.classList.replace('visible-el', 'hidden-el');
+                    resultContainer.setAttribute('aria-hidden', 'true');
+                    inputContainer.classList.replace('hidden-el', 'visible-el');
+                    inputContainer.setAttribute('aria-hidden', 'false');
+                    datePicker.focus({
+                        preventScroll: true
+                    });
+                }
+            });
+            window.addEventListener('firebaseReady', listenForDateChanges);
+        })();
+
+
+        // =============== 下班倒计时（命名空间：offwork-） ===============
+        (function() {
+            // 可配置项
+            const WORK_END_HOUR = 17; // 24 小时制
+            const WORKDAYS = [1, 2, 3, 4, 5]; // 周一~周五
+
+            // DOM
+            const msg = document.getElementById('offwork-msg');
+            const row = document.getElementById('offwork-row');
+            const elH = document.getElementById('offwork-hh');
+            const elM = document.getElementById('offwork-mm');
+            const elS = document.getElementById('offwork-ss');
+            const fireworks = document.getElementById('offwork-fireworks');
+            const fireBtn = document.getElementById('offwork-fire-btn');
+            const card = document.getElementById('offwork-card');
+
+            let animationTriggered = false;
+
+            const inWorkCountdownWindow = (now = new Date()) => {
+                const dayOK = WORKDAYS.includes(now.getDay());
+                const beforeEnd = now.getHours() < WORK_END_HOUR || (now.getHours() === WORK_END_HOUR && now.getMinutes() === 0 && now.getSeconds() === 0);
+                return dayOK && beforeEnd;
+            };
+
+            function launchFireworks() {
+                if (animationTriggered) return;
+                animationTriggered = true;
+                fireworks.classList.remove('hidden');
+                const particle = document.createElement('span');
+                particle.className = 'firework-emoji';
+                particle.textContent = '🎉';
+                fireworks.appendChild(particle);
+                setTimeout(() => {
+                    if (fireworks && particle) {
+                        fireworks.removeChild(particle);
+                        fireworks.classList.add('hidden');
+                        animationTriggered = false;
+                    }
+                }, 2500);
+            }
+
+            function updateCountdown() {
+                const now = new Date();
+
+                if (inWorkCountdownWindow(now)) {
+                    row.classList.remove('hidden');
+
+                    const target = new Date(now.getFullYear(), now.getMonth(), now.getDate(), WORK_END_HOUR, 0, 0);
+                    const diffMs = Math.max(0, target - now);
+
+                    if (diffMs === 0) {
+                        msg.textContent = '祝你下班快乐!';
+                        elH.textContent = elM.textContent = elS.textContent = '00';
+                        card.classList.add('bg-pink-100');
+                        launchFireworks();
+                    } else {
+                        const totalSec = Math.floor(diffMs / 1000);
+                        const h = Math.floor(totalSec / 3600);
+                        const m = Math.floor((totalSec % 3600) / 60);
+                        const s = totalSec % 60;
+                        elH.textContent = pad2(h);
+                        elM.textContent = pad2(m);
+                        elS.textContent = pad2(s);
+                        msg.textContent = '距离下班还有';
+                        card.classList.remove('bg-pink-100');
+                    }
+                } else {
+                    row.classList.add('hidden'); // 彻底隐藏倒计时行，避免冒号残影
+                    msg.textContent = '要好好生活🥰';
+                    card.classList.remove('bg-pink-100');
+                }
+            }
+
+            window.onload = function() {
+                // Initialize Firebase
+                const app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                db = getFirestore(app);
+
+                // Authenticate the user
+                onAuthStateChanged(auth, (user) => {
+                    if (user) {
+                        userId = user.uid;
+                    } else {
+                        // Sign in anonymously if no token is available
+                        signInAnonymously(auth).then(cred => {
+                            userId = cred.user.uid;
+                        });
+                    }
+                    if (userId) {
+                        document.getElementById('user-id').textContent = userId;
+                        // Dispatch a custom event to signal that Firebase is ready
+                        window.dispatchEvent(new Event('firebaseReady'));
+                    }
+                });
+
+                // Start the off-work countdown
+                updateCountdown();
+                setInterval(updateCountdown, 1000);
+                fireBtn.addEventListener('click', launchFireworks);
+            };
+        })();
+    </script>
 </body>
 </html>
